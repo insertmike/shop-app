@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/cart.dart' show Cart;
 import '../widgets/cart_item.dart';
+import '../providers/orders.dart';
 
 class CartScreen extends StatelessWidget {
   static const routeName = '/cart';
@@ -38,7 +39,11 @@ class CartScreen extends StatelessWidget {
                   ),
                   FlatButton(
                     child: Text('Order now'),
-                    onPressed: () {},
+                    onPressed: () {
+                      Provider.of<Orders>(context, listen: false).addOrder(
+                          cart.items.values.toList(), cart.totalAmount);
+                      cart.clearBasket();
+                    },
                     textColor: Theme.of(context).primaryColor,
                   ),
                 ],
