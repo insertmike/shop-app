@@ -15,12 +15,10 @@ class CartItem {
 }
 
 class Cart with ChangeNotifier {
-  Map<String, CartItem> _items = {
-
-  };
+  Map<String, CartItem> _items = {};
 
   Map<String, CartItem> get items {
-    return {...items};
+    return {..._items};
   }
 
   int get itemCount {
@@ -29,12 +27,10 @@ class Cart with ChangeNotifier {
 
   double get totalAmount {
     var total = 0.0;
-    _items.forEach(
-      (key, cartItem){
-        total += cartItem.price * cartItem.quantity;
-      }
-    );
-     return total;
+    _items.forEach((key, cartItem) {
+      total += cartItem.price * cartItem.quantity;
+    });
+    return total;
   }
 
   void addItem(String productId, double price, String title) {
@@ -51,13 +47,13 @@ class Cart with ChangeNotifier {
     } else {
       // Add new entry
       _items.putIfAbsent(
-        productId,
-        () => CartItem(
-            id: DateTime.now().toString(),
-            title: title,
-            price: price,
-            quantity: 1),
-      );
+          productId,
+          () => CartItem(
+              id: DateTime.now().toString(),
+              title: title,
+              price: price,
+              quantity: 1));
+
       notifyListeners();
     }
   }
