@@ -17,13 +17,14 @@ class OrderItem {
 }
 
 class Orders with ChangeNotifier {
+
   List<OrderItem> _orders = [];
 
   List<OrderItem> get orders {
-    return [...orders];
+    return [..._orders];
   }
 
-  void addOrder(List<CartItem> list, double total) {
+  void addOrder(List<CartItem> cartProducts, double total) {
     // Add to the beginning of the list
     _orders.insert(
         0,
@@ -31,8 +32,9 @@ class Orders with ChangeNotifier {
           id: DateTime.now().toString(),
           amount: total,
           dateTime: DateTime.now(),
-          products: list,
-        ));
+          products: cartProducts,
+        ),
+        );
     notifyListeners();
   }
 }
