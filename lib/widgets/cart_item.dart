@@ -38,7 +38,7 @@ class CartItem extends StatelessWidget {
             ],
           ), 
           
-        )
+        );
       },
       key: ValueKey(id),
       background: Container(
