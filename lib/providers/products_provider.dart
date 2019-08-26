@@ -46,6 +46,15 @@ class Products with ChangeNotifier {
     return _items.firstWhere((prod) => prod.id == id);
   }
 
+  void updateProduct(String id, Product updatedProduct) {
+    final prodIndex = _items.indexWhere((prod) => prod.id == id);
+    if (prodIndex >= 0) {
+      _items[prodIndex] = updatedProduct;
+    } else {
+      // Err Management
+    }
+  }
+
   List<Product> get favoriteItems {
     return _items.where((prod) => prod.isFavorite).toList();
   }

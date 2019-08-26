@@ -30,6 +30,33 @@ class _EditProductScreenState extends State<EditProductScreen> {
     super.initState();
   }
 
+  // run before build
+  // Used so did change dependencies work once
+  // We do this because we cant access ModalRouteOf in initState
+  bool _isInit = true;
+  @override
+  void didChangeDependencies() {
+    if (_isInit) {
+      final productId = ModalRoute.of(context).settings.arguments as String;
+      if (productId == null) {
+        return;
+      }
+
+      _editedProduct =
+          Provider.of<Products>(context, listen: false).findById(productId);
+      _initValues = {
+        'title': _editedProduct.title,
+        'description': _editedProduct.description,
+        'price': _editedProduct.price.toString(),
+        'imageUrl': '',
+      };
+      _imageUrlController.text = _editedProduct.imageUrl;
+    }
+    _isInit = false;
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+  }
+
   void _updateImageUrl() {
     if (!_imageUrlFocusNode.hasFocus) {
       if (!_imageUrlController.text.startsWith('http') ||
@@ -57,10 +84,24 @@ class _EditProductScreenState extends State<EditProductScreen> {
     if (!isValid) {
       return;
     }
+
     _form.currentState.save();
-    Provider.of<Products>(context, listen: false).addProduct(_editedProduct);
+    if (_editedProduct.id != null) {
+      Provider.of<Products>(context, listen: false)
+          .updateProduct(_editedProduct.id, _editedProduct);
+    } else {
+      Provider.of<Products>(context, listen: false).addProduct(_editedProduct);
+    }
+
     Navigator.of(context).pop();
   }
+
+  var _initValues = {
+    'title': '',
+    'description': '',
+    'price': '',
+    'imageUrl': '',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +122,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
           child: ListView(
             children: <Widget>[
               TextFormField(
+                initialValue: _initValues['title'],
                 decoration: InputDecoration(
                   labelText: 'Title',
                 ),
@@ -89,12 +131,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
                   // Create new product and overright the existing with it
                   // because the properties of the Product class are empty
                   _editedProduct = Product(
-                    title: value,
-                    description: _editedProduct.description,
-                    id: null,
-                    imageUrl: _editedProduct.imageUrl,
-                    price: _editedProduct.price,
-                  );
+                      title: value,
+                      description: _editedProduct.description,
+                      imageUrl: _editedProduct.imageUrl,
+                      price: _editedProduct.price,
+                      id: _editedProduct.id,
+                      isFavorite: _editedProduct.isFavorite);
                 },
                 onFieldSubmitted: (val) =>
                     FocusScope.of(context).requestFocus(_priceFocusNode),
@@ -106,6 +148,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 },
               ),
               TextFormField(
+                initialValue: _initValues['price'],
                 decoration: InputDecoration(labelText: 'Price'),
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.number,
@@ -127,17 +170,18 @@ class _EditProductScreenState extends State<EditProductScreen> {
                   // Create new product and overright the existing with it
                   // because the properties of the Product class are empty
                   _editedProduct = Product(
-                    title: _editedProduct.title,
-                    description: _editedProduct.description,
-                    id: null,
-                    imageUrl: _editedProduct.imageUrl,
-                    price: double.parse(value),
-                  );
+                      title: _editedProduct.title,
+                      description: _editedProduct.description,
+                      imageUrl: _editedProduct.imageUrl,
+                      price: double.parse(value),
+                      id: _editedProduct.id,
+                      isFavorite: _editedProduct.isFavorite);
                 },
                 onFieldSubmitted: (val) =>
                     FocusScope.of(context).requestFocus(_descriptionFocusNode),
               ),
               TextFormField(
+                initialValue: _initValues['description'],
                 decoration: InputDecoration(labelText: 'Description'),
                 maxLines: 3,
                 focusNode: _descriptionFocusNode,
@@ -147,12 +191,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
                   // Create new product and overright the existing with it
                   // because the properties of the Product class are empty
                   _editedProduct = Product(
-                    title: _editedProduct.title,
-                    description: value,
-                    id: null,
-                    imageUrl: _editedProduct.imageUrl,
-                    price: _editedProduct.price,
-                  );
+                      title: _editedProduct.title,
+                      description: value,
+                      imageUrl: _editedProduct.imageUrl,
+                      price: _editedProduct.price,
+                      id: _editedProduct.id,
+                      isFavorite: _editedProduct.isFavorite);
                 },
                 validator: (value) {
                   if (value.isEmpty) {
@@ -194,12 +238,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
                         // Create new product and overright the existing with it
                         // because the properties of the Product class are empty
                         _editedProduct = Product(
-                          title: _editedProduct.title,
-                          description: _editedProduct.description,
-                          id: null,
-                          imageUrl: value,
-                          price: _editedProduct.price,
-                        );
+                            title: _editedProduct.title,
+                            description: _editedProduct.description,
+                            imageUrl: value,
+                            price: _editedProduct.price,
+                            id: _editedProduct.id,
+                            isFavorite: _editedProduct.isFavorite);
                       },
                       keyboardType: TextInputType.url,
                       textInputAction: TextInputAction.done,
