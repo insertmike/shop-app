@@ -1,9 +1,7 @@
-
-import 'package:flutter/material.dart'; 
+import 'package:flutter/material.dart';
 import '../providers/product.dart';
 
-
-class Products with ChangeNotifier{
+class Products with ChangeNotifier {
   List<Product> _items = [
     Product(
       id: 'p1',
@@ -43,14 +41,25 @@ class Products with ChangeNotifier{
     // Return copy [...] not pointer
     return [..._items];
   }
-  Product findById(String id){
+
+  Product findById(String id) {
     return _items.firstWhere((prod) => prod.id == id);
   }
+
   List<Product> get favoriteItems {
     return _items.where((prod) => prod.isFavorite).toList();
   }
-  void addProduct(){
+
+  void addProduct(Product product) {
+    final newProduct = Product(
+      description: product.description,
+      id: DateTime.now().toString(),
+      imageUrl: product.imageUrl,
+      price: product.price,
+      title: product.title,
+    );
+    _items.add(newProduct);
     //_items.add(value);
     notifyListeners();
   }
-} 
+}
