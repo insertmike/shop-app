@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../providers/product.dart';
 
 class EditProductScreen extends StatefulWidget {
   static String routeName = '/editProductScreen';
@@ -11,6 +12,14 @@ class _EditProductScreenState extends State<EditProductScreen> {
   final _descriptionFocusNode = FocusNode();
   final _imageUrlController = TextEditingController();
   final _imageUrlFocusNode = FocusNode();
+  final _form = GlobalKey<FormState>();
+  var _editedProduct = Product(
+    id: null,
+    title: null,
+    description: null,
+    imageUrl: null,
+    price: null,
+  );
 
   @override
   void initState() {
@@ -20,6 +29,11 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
   void _updateImageUrl() {
     if (!_imageUrlFocusNode.hasFocus) {
+      if (!_imageUrlController.text.startsWith('http') ||
+          !_imageUrlController.text.startsWith('https')) {
+        return;
+      }
+
       setState(() {});
     }
   }
@@ -35,7 +49,17 @@ class _EditProductScreenState extends State<EditProductScreen> {
     super.dispose();
   }
 
-  void _submitForm() {}
+  void _submitForm() {
+    final isValid = _form.currentState.validate();
+    if (!isValid) {
+      return;
+    }
+    _form.currentState.save();
+    print(_editedProduct.title);
+    print(_editedProduct.description);
+    print(_editedProduct.price);
+    print(_editedProduct.imageUrl);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,19 +76,63 @@ class _EditProductScreenState extends State<EditProductScreen> {
       body: Padding(
         padding: const EdgeInsets.all(15.0),
         child: Form(
+          key: _form,
           child: ListView(
             children: <Widget>[
               TextFormField(
-                decoration: InputDecoration(labelText: 'Title'),
+                decoration: InputDecoration(
+                  labelText: 'Title',
+                ),
                 textInputAction: TextInputAction.next,
+                onSaved: (value) {
+                  // Create new product and overright the existing with it
+                  // because the properties of the Product class are empty
+                  _editedProduct = Product(
+                    title: value,
+                    description: _editedProduct.description,
+                    id: null,
+                    imageUrl: _editedProduct.imageUrl,
+                    price: _editedProduct.price,
+                  );
+                },
                 onFieldSubmitted: (val) =>
                     FocusScope.of(context).requestFocus(_priceFocusNode),
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please fill the form';
+                  }
+                  return null;
+                },
               ),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Price'),
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.number,
                 focusNode: _priceFocusNode,
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please fill the form';
+                  }
+                  if (double.tryParse(value) == null) {
+                    return 'Please fill a valid number';
+                  }
+                  if (double.parse(value) <= 0) {
+                    return 'Please enter a value greater than 0';
+                  }
+
+                  return null;
+                },
+                onSaved: (value) {
+                  // Create new product and overright the existing with it
+                  // because the properties of the Product class are empty
+                  _editedProduct = Product(
+                    title: _editedProduct.title,
+                    description: _editedProduct.description,
+                    id: null,
+                    imageUrl: _editedProduct.imageUrl,
+                    price: double.parse(value),
+                  );
+                },
                 onFieldSubmitted: (val) =>
                     FocusScope.of(context).requestFocus(_descriptionFocusNode),
               ),
@@ -74,6 +142,23 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 focusNode: _descriptionFocusNode,
                 keyboardType: TextInputType.multiline,
                 textInputAction: TextInputAction.next,
+                onSaved: (value) {
+                  // Create new product and overright the existing with it
+                  // because the properties of the Product class are empty
+                  _editedProduct = Product(
+                    title: _editedProduct.title,
+                    description: value,
+                    id: null,
+                    imageUrl: _editedProduct.imageUrl,
+                    price: _editedProduct.price,
+                  );
+                },
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please fill the form';
+                  }
+                  return null;
+                },
                 onFieldSubmitted: (val) =>
                     FocusScope.of(context).requestFocus(_imageUrlFocusNode),
               ),
@@ -104,11 +189,33 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       decoration: InputDecoration(
                         labelText: 'Image URL',
                       ),
+                      onSaved: (value) {
+                        // Create new product and overright the existing with it
+                        // because the properties of the Product class are empty
+                        _editedProduct = Product(
+                          title: _editedProduct.title,
+                          description: _editedProduct.description,
+                          id: null,
+                          imageUrl: value,
+                          price: _editedProduct.price,
+                        );
+                      },
                       keyboardType: TextInputType.url,
                       textInputAction: TextInputAction.done,
                       controller: _imageUrlController,
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Please fill out this field';
+                        }
+                        if (!value.startsWith('http') ||
+                            !value.startsWith('https')) {
+                          return 'Please enter a valid URL';
+                        }
+
+                        return null;
+                      },
                       focusNode: _imageUrlFocusNode,
-                      onFieldSubmitted: (val) => _submitForm,
+                      onFieldSubmitted: (val) => _submitForm(),
                     ),
                   ),
                 ],
