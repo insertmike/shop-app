@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
-
+import 'package:flutter_complete_guide/models/http_exception.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import './cart.dart';
 
 class OrderItem {
@@ -17,24 +19,64 @@ class OrderItem {
 }
 
 class Orders with ChangeNotifier {
-
   List<OrderItem> _orders = [];
 
   List<OrderItem> get orders {
     return [..._orders];
   }
 
-  void addOrder(List<CartItem> cartProducts, double total) {
+  // Future<void> addProduct(Product product) async {
+  //   const url = 'https://shop-app-flutter-24a54.firebaseio.com/products.json';
+  //   try {
+  //     final response = await http.post(
+  //       url,
+  //       body: json.encode(
+  //         {
+
+  Future<void> addOrder(List<CartItem> cartProducts, double total) async {
+    const url = 'https://shop-app-flutter-24a54.firebaseio.com/orders.json';
+    try {
+      final response = await http.post(
+        url,
+        body: json.encode({
+          'amount': total,
+          'dateTime': DateTime.now(),
+          //      'products': L
+        }),
+      );
+    } catch (err) {}
     // Add to the beginning of the list
     _orders.insert(
-        0,
-        OrderItem(
-          id: DateTime.now().toString(),
-          amount: total,
-          dateTime: DateTime.now(),
-          products: cartProducts,
-        ),
-        );
+      0,
+      OrderItem(
+        id: DateTime.now().toString(),
+        amount: total,
+        dateTime: DateTime.now(),
+        products: cartProducts,
+      ),
+    );
     notifyListeners();
   }
 }
+//           'title': product.title,
+//           'description': product.description,
+//           'imageUrl': product.imageUrl,
+//           'price': product.price,
+//           'isFavorite': product.isFavorite,
+//         },
+//       ),
+//     );
+//     final newProduct = Product(
+//       description: product.description,
+//       id: json.decode(response.body)['name'],
+//       imageUrl: product.imageUrl,
+//       price: product.price,
+//       title: product.title,
+//     );
+//     _items.add(newProduct);
+//     notifyListeners();
+//   } catch (error) {
+//     print(error);
+//     throw error;
+//   }
+// }

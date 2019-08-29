@@ -8,6 +8,7 @@ import '../providers/cart.dart';
 class ProductItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final scaffold = Scaffold.of(context);
     final product = Provider.of<Product>(context, listen: false);
     final cart = Provider.of<Cart>(context, listen: false);
     return ClipRRect(
@@ -27,12 +28,24 @@ class ProductItem extends StatelessWidget {
           backgroundColor: Colors.black54,
           leading: Consumer<Product>(
             builder: (ctx, product, _) => IconButton(
-              icon: Icon(
-                product.isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: Theme.of(context).accentColor,
-              ),
-              onPressed: () => product.toggleFavoriteStatus(),
-            ),
+                icon: Icon(
+                  product.isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: Theme.of(context).accentColor,
+                ),
+                onPressed: () async {
+                  try {
+                    await product.toggleFavoriteStatus();
+                  } catch (err) {
+                    scaffold.showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Failed toggling the favorite status',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    );
+                  }
+                }),
           ),
           trailing: IconButton(
             icon: Icon(
