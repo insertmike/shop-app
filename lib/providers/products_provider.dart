@@ -70,8 +70,10 @@ class Products with ChangeNotifier {
         title: product.title,
       );
       _items.add(newProduct);
-      //_items.add(value);
       notifyListeners();
+    }).catchError((error) {
+      print(error);
+      throw error;
     });
   }
 
