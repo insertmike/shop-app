@@ -45,9 +45,10 @@ class Products with ChangeNotifier {
     return [..._items];
   }
 
-  void addProduct(Product product) {
+  Future<void> addProduct(Product product) {
     const url = 'https://shop-app-flutter-24a54.firebaseio.com/products.json';
-    http.post(
+    return http
+        .post(
       url,
       body: json.encode(
         {
@@ -58,18 +59,20 @@ class Products with ChangeNotifier {
           'isFavorite': product.isFavorite,
         },
       ),
-    );
-
-    final newProduct = Product(
-      description: product.description,
-      id: DateTime.now().toString(),
-      imageUrl: product.imageUrl,
-      price: product.price,
-      title: product.title,
-    );
-    _items.add(newProduct);
-    //_items.add(value);
-    notifyListeners();
+    )
+        .then((res) {
+      print(json.decode(res.body));
+      final newProduct = Product(
+        description: product.description,
+        id: json.decode(res.body)['name'],
+        imageUrl: product.imageUrl,
+        price: product.price,
+        title: product.title,
+      );
+      _items.add(newProduct);
+      //_items.add(value);
+      notifyListeners();
+    });
   }
 
   Product findById(String id) {

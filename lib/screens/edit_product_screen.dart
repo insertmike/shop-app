@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-
 import '../providers/product.dart';
 import '../providers/products_provider.dart';
 
@@ -35,6 +34,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
   // Used so did change dependencies work once
   // We do this because we cant access ModalRouteOf in initState
   bool _isInit = true;
+  bool _isLoading = false;
   @override
   void didChangeDependencies() {
     if (_isInit) {
@@ -87,15 +87,25 @@ class _EditProductScreenState extends State<EditProductScreen> {
     }
 
     _form.currentState.save();
+    setState(() {
+      _isLoading = true;
+    });
     if (_editedProduct.id != null) {
       Provider.of<Products>(context, listen: false)
           .updateProduct(_editedProduct.id, _editedProduct);
+      setState(() {
+        _isLoading = false;
+      });
     } else {
-
-      Provider.of<Products>(context, listen: false).addProduct(_editedProduct);
+      Provider.of<Products>(context, listen: false)
+          .addProduct(_editedProduct)
+          .then((_) {
+        setState(() {
+          _isLoading = true;
+        });
+        Navigator.of(context).pop();
+      });
     }
-
-    Navigator.of(context).pop();
   }
 
   var _initValues = {
@@ -119,160 +129,164 @@ class _EditProductScreenState extends State<EditProductScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(15.0),
-        child: Form(
-          key: _form,
-          child: ListView(
-            children: <Widget>[
-              TextFormField(
-                initialValue: _initValues['title'],
-                decoration: InputDecoration(
-                  labelText: 'Title',
-                ),
-                textInputAction: TextInputAction.next,
-                onSaved: (value) {
-                  // Create new product and overright the existing with it
-                  // because the properties of the Product class are empty
-                  _editedProduct = Product(
-                      title: value,
-                      description: _editedProduct.description,
-                      imageUrl: _editedProduct.imageUrl,
-                      price: _editedProduct.price,
-                      id: _editedProduct.id,
-                      isFavorite: _editedProduct.isFavorite);
-                },
-                onFieldSubmitted: (val) =>
-                    FocusScope.of(context).requestFocus(_priceFocusNode),
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return 'Please fill the form';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                initialValue: _initValues['price'],
-                decoration: InputDecoration(labelText: 'Price'),
-                textInputAction: TextInputAction.next,
-                keyboardType: TextInputType.number,
-                focusNode: _priceFocusNode,
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return 'Please fill the form';
-                  }
-                  if (double.tryParse(value) == null) {
-                    return 'Please fill a valid number';
-                  }
-                  if (double.parse(value) <= 0) {
-                    return 'Please enter a value greater than 0';
-                  }
-
-                  return null;
-                },
-                onSaved: (value) {
-                  // Create new product and overright the existing with it
-                  // because the properties of the Product class are empty
-                  _editedProduct = Product(
-                      title: _editedProduct.title,
-                      description: _editedProduct.description,
-                      imageUrl: _editedProduct.imageUrl,
-                      price: double.parse(value),
-                      id: _editedProduct.id,
-                      isFavorite: _editedProduct.isFavorite);
-                },
-                onFieldSubmitted: (val) =>
-                    FocusScope.of(context).requestFocus(_descriptionFocusNode),
-              ),
-              TextFormField(
-                initialValue: _initValues['description'],
-                decoration: InputDecoration(labelText: 'Description'),
-                maxLines: 3,
-                focusNode: _descriptionFocusNode,
-                keyboardType: TextInputType.multiline,
-                textInputAction: TextInputAction.next,
-                onSaved: (value) {
-                  // Create new product and overright the existing with it
-                  // because the properties of the Product class are empty
-                  _editedProduct = Product(
-                      title: _editedProduct.title,
-                      description: value,
-                      imageUrl: _editedProduct.imageUrl,
-                      price: _editedProduct.price,
-                      id: _editedProduct.id,
-                      isFavorite: _editedProduct.isFavorite);
-                },
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return 'Please fill the form';
-                  }
-                  return null;
-                },
-                onFieldSubmitted: (val) =>
-                    FocusScope.of(context).requestFocus(_imageUrlFocusNode),
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: <Widget>[
-                  Container(
-                    width: 100,
-                    height: 100,
-                    margin: EdgeInsets.only(
-                      top: 8,
-                      right: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border.all(width: 1, color: Colors.grey),
-                    ),
-                    child: _imageUrlController.text.isEmpty
-                        ? Container()
-                        : FittedBox(
-                            child: Image.network(
-                              _imageUrlController.text,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                  ),
-                  Expanded(
-                    child: TextFormField(
+        child: _isLoading
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            : Form(
+                key: _form,
+                child: ListView(
+                  children: <Widget>[
+                    TextFormField(
+                      initialValue: _initValues['title'],
                       decoration: InputDecoration(
-                        labelText: 'Image URL',
+                        labelText: 'Title',
                       ),
+                      textInputAction: TextInputAction.next,
+                      onSaved: (value) {
+                        // Create new product and overright the existing with it
+                        // because the properties of the Product class are empty
+                        _editedProduct = Product(
+                            title: value,
+                            description: _editedProduct.description,
+                            imageUrl: _editedProduct.imageUrl,
+                            price: _editedProduct.price,
+                            id: _editedProduct.id,
+                            isFavorite: _editedProduct.isFavorite);
+                      },
+                      onFieldSubmitted: (val) =>
+                          FocusScope.of(context).requestFocus(_priceFocusNode),
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Please fill the form';
+                        }
+                        return null;
+                      },
+                    ),
+                    TextFormField(
+                      initialValue: _initValues['price'],
+                      decoration: InputDecoration(labelText: 'Price'),
+                      textInputAction: TextInputAction.next,
+                      keyboardType: TextInputType.number,
+                      focusNode: _priceFocusNode,
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Please fill the form';
+                        }
+                        if (double.tryParse(value) == null) {
+                          return 'Please fill a valid number';
+                        }
+                        if (double.parse(value) <= 0) {
+                          return 'Please enter a value greater than 0';
+                        }
+
+                        return null;
+                      },
                       onSaved: (value) {
                         // Create new product and overright the existing with it
                         // because the properties of the Product class are empty
                         _editedProduct = Product(
                             title: _editedProduct.title,
                             description: _editedProduct.description,
-                            imageUrl: value,
+                            imageUrl: _editedProduct.imageUrl,
+                            price: double.parse(value),
+                            id: _editedProduct.id,
+                            isFavorite: _editedProduct.isFavorite);
+                      },
+                      onFieldSubmitted: (val) => FocusScope.of(context)
+                          .requestFocus(_descriptionFocusNode),
+                    ),
+                    TextFormField(
+                      initialValue: _initValues['description'],
+                      decoration: InputDecoration(labelText: 'Description'),
+                      maxLines: 3,
+                      focusNode: _descriptionFocusNode,
+                      keyboardType: TextInputType.multiline,
+                      textInputAction: TextInputAction.next,
+                      onSaved: (value) {
+                        // Create new product and overright the existing with it
+                        // because the properties of the Product class are empty
+                        _editedProduct = Product(
+                            title: _editedProduct.title,
+                            description: value,
+                            imageUrl: _editedProduct.imageUrl,
                             price: _editedProduct.price,
                             id: _editedProduct.id,
                             isFavorite: _editedProduct.isFavorite);
                       },
-                      keyboardType: TextInputType.url,
-                      textInputAction: TextInputAction.done,
-                      controller: _imageUrlController,
                       validator: (value) {
                         if (value.isEmpty) {
-                          return 'Please fill out this field';
+                          return 'Please fill the form';
                         }
-                        if (!value.startsWith('http') ||
-                            !value.startsWith('https')) {
-                          return 'Please enter a valid URL';
-                        }
-
                         return null;
                       },
-                      focusNode: _imageUrlFocusNode,
-                      onFieldSubmitted: (val) => _submitForm(),
+                      onFieldSubmitted: (val) => FocusScope.of(context)
+                          .requestFocus(_imageUrlFocusNode),
                     ),
-                  ),
-                ],
-              )
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        Container(
+                          width: 100,
+                          height: 100,
+                          margin: EdgeInsets.only(
+                            top: 8,
+                            right: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            border: Border.all(width: 1, color: Colors.grey),
+                          ),
+                          child: _imageUrlController.text.isEmpty
+                              ? Container()
+                              : FittedBox(
+                                  child: Image.network(
+                                    _imageUrlController.text,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                        ),
+                        Expanded(
+                          child: TextFormField(
+                            decoration: InputDecoration(
+                              labelText: 'Image URL',
+                            ),
+                            onSaved: (value) {
+                              // Create new product and overright the existing with it
+                              // because the properties of the Product class are empty
+                              _editedProduct = Product(
+                                  title: _editedProduct.title,
+                                  description: _editedProduct.description,
+                                  imageUrl: value,
+                                  price: _editedProduct.price,
+                                  id: _editedProduct.id,
+                                  isFavorite: _editedProduct.isFavorite);
+                            },
+                            keyboardType: TextInputType.url,
+                            textInputAction: TextInputAction.done,
+                            controller: _imageUrlController,
+                            validator: (value) {
+                              if (value.isEmpty) {
+                                return 'Please fill out this field';
+                              }
+                              if (!value.startsWith('http') ||
+                                  !value.startsWith('https')) {
+                                return 'Please enter a valid URL';
+                              }
 
-              /*
+                              return null;
+                            },
+                            focusNode: _imageUrlFocusNode,
+                            onFieldSubmitted: (val) => _submitForm(),
+                          ),
+                        ),
+                      ],
+                    )
+
+                    /*
               */
-            ],
-          ),
-        ),
+                  ],
+                ),
+              ),
       ),
     );
   }
