@@ -80,7 +80,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
     super.dispose();
   }
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     final isValid = _form.currentState.validate();
     if (!isValid) {
       return;
@@ -97,33 +97,31 @@ class _EditProductScreenState extends State<EditProductScreen> {
         _isLoading = false;
       });
     } else {
-      Provider.of<Products>(context, listen: false)
-          .addProduct(_editedProduct)
-          .catchError((err){
-            return showDialog(
-              context: context,
-              builder: (ctx) => AlertDialog(
-                title: Text('An error occured!'),
-                content: Text('Something went wrong.'),
-                actions: <Widget>[
-                  FlatButton(
-                    child: Text('Okay'),
-                    onPressed: (){
-                      Navigator.of(ctx).pop();
-                    },
-                  )
-                ],
-
-              ),
-              
-            )
-          })
-          .then((_) {
+      try {
+        await Provider.of<Products>(context, listen: false)
+            .addProduct(_editedProduct);
+      } catch (err) {
+        await showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text('An error occured!'),
+            content: Text('Something went wrong.'),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('Okay'),
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                },
+              )
+            ],
+          ),
+        );
+      } finally {
         setState(() {
           _isLoading = true;
         });
         Navigator.of(context).pop();
-      });
+      }
     }
   }
 
