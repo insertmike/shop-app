@@ -21,7 +21,9 @@ class Auth with ChangeNotifier {
     }
     return null;
   }
-
+  String get userId {
+    return _userId;
+  }
   Future<void> _auth(String email, String password, String urlApiKey) async {
     try {
       final url =

@@ -8,8 +8,9 @@ import '../providers/product.dart';
 class Products with ChangeNotifier {
   List<Product> _items = [];
   final String authToken;
+  final String userId;
 
-  Products(this.authToken, this._items);
+  Products(this.authToken, this.userId, this._items);
 
   List<Product> get items {
     // Return copy [...] not pointer
@@ -17,7 +18,7 @@ class Products with ChangeNotifier {
   }
 
   Future<void> fetchAndSetProducts() async {
-    final url =
+    var url =
         'https://shop-app-flutter-24a54.firebaseio.com/products.json?auth=$authToken';
 
     try {
@@ -27,15 +28,24 @@ class Products with ChangeNotifier {
       if (extractedData == null) return;
       final List<Product> loadedProducts = [];
       if (extractedData.length == 0) throw Error;
-      extractedData.forEach((prodId, prodData) {
-        loadedProducts.add(Product(
-            id: prodId,
-            description: prodData['description'],
-            imageUrl: prodData['imageUrl'],
-            price: prodData['price'],
-            title: prodData['title'],
-            isFavorite: prodData['isFavorite']));
-      });
+      url =
+          'https://shop-app-flutter-24a54.firebaseio.com/userFavorites/$userId.json?auth=$authToken';
+      final favoriteResponse = await http.get(url);
+      final favoriteData = json.decode(favoriteResponse.body);
+      extractedData.forEach(
+        (prodId, prodData) {
+          loadedProducts.add(Product(
+              id: prodId,
+              description: prodData['description'],
+              imageUrl: prodData['imageUrl'],
+              price: prodData['price'],
+              title: prodData['title'],
+              isFavorite: favoriteData == null
+                  ? false
+                  : favoriteData[prodId] ?? false));
+        },
+      );
+
       _items = loadedProducts;
       notifyListeners();
     } catch (err) {
@@ -44,7 +54,8 @@ class Products with ChangeNotifier {
   }
 
   Future<void> addProduct(Product product) async {
-    final url = 'https://shop-app-flutter-24a54.firebaseio.com/products.json?auth=$authToken';
+    final url =
+        'https://shop-app-flutter-24a54.firebaseio.com/products.json?auth=$authToken';
     try {
       final response = await http.post(
         url,
@@ -54,7 +65,6 @@ class Products with ChangeNotifier {
             'description': product.description,
             'imageUrl': product.imageUrl,
             'price': product.price,
-            'isFavorite': product.isFavorite,
           },
         ),
       );
