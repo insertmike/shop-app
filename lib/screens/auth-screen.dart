@@ -1,8 +1,10 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_complete_guide/models/http_exception.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth.dart';
+import '../models/http_exception.dart';
 
 enum AuthMode { Signup, Login }
 
@@ -111,22 +113,56 @@ class _AuthCardState extends State<AuthCard> {
     setState(() {
       _isLoading = true;
     });
-    if (_authMode == AuthMode.Login) {
-      await Provider.of<Auth>(context, listen: false)
-          .signin(_authData['email'], _authData['password']);
-      setState(() {
-        _isLoading = false;
-      });
+    try {
+      if (_authMode == AuthMode.Login) {
+        await Provider.of<Auth>(context, listen: false)
+            .signin(_authData['email'], _authData['password']);
+        setState(() {
+          _isLoading = false;
+        });
 
-      // Log user in
-    } else {
-      // Sign user up
-      await Provider.of<Auth>(context, listen: false)
-          .signup(_authData['email'], _authData['password']);
+        // Log user in
+      } else {
+        // Sign user up
+        await Provider.of<Auth>(context, listen: false)
+            .signup(_authData['email'], _authData['password']);
+      }
+    } on HttpException catch (err) {
+      var errMessage = "Authentication failed";
+      if (err.toString().contains('EMAIL_EXISTS')) {
+        errMessage = 'This email address already exists';
+      } else if (err.toString().contains('INVALID_EMAIL')) {
+        errMessage = 'This is not a valid email';
+      } else if (err.toString().contains('WEAK_PASSWORD')) {
+        errMessage = 'This password is too weak';
+      } else if (err.toString().contains('INVALID_PASSWORD')) {
+        errMessage = 'Invalid password';
+      }
+      _showErrorDialog(errMessage);
+    } catch (err) {
+      const errMessage = 'Could not authenticate you. Pease try again later';
+      _showErrorDialog(errMessage);
     }
+
     setState(() {
       _isLoading = false;
     });
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('An Error Occured!'),
+        content: Text(message),
+        actions: <Widget>[
+          FlatButton(
+            child: Text('Okay'),
+            onPressed: () => Navigator.of(context).pop(),
+          )
+        ],
+      ),
+    );
   }
 
   void _switchAuthMode() {
