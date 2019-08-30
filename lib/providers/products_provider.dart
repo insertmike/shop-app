@@ -22,6 +22,7 @@ class Products with ChangeNotifier {
       final List<Product> loadedProducts = [];
       if(extractedData.length == 0) throw Error;
       extractedData.forEach((prodId, prodData) {
+        print(prodId);
         loadedProducts.add(Product(
             id: prodId,
             description: prodData['description'],
