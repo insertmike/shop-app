@@ -7,6 +7,9 @@ import '../providers/product.dart';
 
 class Products with ChangeNotifier {
   List<Product> _items = [];
+  final String authToken;
+
+  Products(this.authToken, this._items);
 
   List<Product> get items {
     // Return copy [...] not pointer
@@ -14,15 +17,17 @@ class Products with ChangeNotifier {
   }
 
   Future<void> fetchAndSetProducts() async {
-    const url = 'https://shop-app-flutter-24a54.firebaseio.com/products.json';
+    final url =
+        'https://shop-app-flutter-24a54.firebaseio.com/products.json?auth=$authToken';
+    
     try {
       final response = await http.get(url);
+      print(json.decode(response.body));
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
-      if(extractedData == null) return;
+      if (extractedData == null) return;
       final List<Product> loadedProducts = [];
-      if(extractedData.length == 0) throw Error;
+      if (extractedData.length == 0) throw Error;
       extractedData.forEach((prodId, prodData) {
-        print(prodId);
         loadedProducts.add(Product(
             id: prodId,
             description: prodData['description'],
@@ -99,7 +104,6 @@ class Products with ChangeNotifier {
   }
 
   Future<void> deleteProduct(String id) async {
-    
     final url =
         'https://shop-app-flutter-24a54.firebaseio.com/products/$id.json';
     final existingProductIndex = _items.indexWhere((prod) => prod.id == id);
@@ -108,12 +112,11 @@ class Products with ChangeNotifier {
     notifyListeners();
     final res = await http.delete(url);
     if (res.statusCode >= 400) {
-      
       // If deleting from server fails
       _items.insert(existingProductIndex, existingProduct);
       notifyListeners();
       throw HttpException('Could not delete product.');
-    } 
+    }
     existingProduct = null;
   }
 
