@@ -7,18 +7,23 @@ class Auth with ChangeNotifier {
   String _token;
   DateTime _expiryDate;
   String _userId;
-
-  Future<void> signup(String email, String password) async {
-    const url = 'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyCA1uP1skoLoFcuutUImcgU23JsNcOxBMY';
-    final response = await http.post(url, body: json.encode(
-      {
-      'email' : email,
-      'password' : password,
-      'returnSecureToken': true
-      }
-    ));
+  Future<void> _auth(String email, String password, String urlApiKey) async {
+    final url = 'https://identitytoolkit.googleapis.com/v1/accounts:$urlApiKey';
+    final response = await http.post(url,
+        body: json.encode(
+            {'email': email, 'password': password, 'returnSecureToken': true}));
     print(json.decode(response.body));
-
   }
 
+  Future<void> signup(String email, String password) async {
+    var urlApiKey = "signUp?key=AIzaSyCA1uP1skoLoFcuutUImcgU23JsNcOxBMY";
+    return _auth(email, password, urlApiKey);
+    //
+  }
+
+  Future<void> signin(String email, String password) async {
+    var urlApiKey =
+        "signInWithPassword?key=AIzaSyCA1uP1skoLoFcuutUImcgU23JsNcOxBMY";
+    return _auth(email, password, urlApiKey);
+  }
 }
