@@ -5,8 +5,8 @@ import '../screens/product_detail_screen.dart';
 import '../providers/product.dart';
 import '../providers/cart.dart';
 import '../providers/auth.dart';
-class ProductItem extends StatelessWidget {
 
+class ProductItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scaffold = Scaffold.of(context);
@@ -21,9 +21,13 @@ class ProductItem extends StatelessWidget {
             Navigator.of(context).pushNamed(ProductDetailScreen.routeName,
                 arguments: product.id);
           },
-          child: Image.network(
-            product.imageUrl,
-            fit: BoxFit.cover,
+          child: Hero(
+            tag: product.id,
+            child: FadeInImage(
+              placeholder: AssetImage('assets/images/product-placeholder.png'),
+              image: NetworkImage(product.imageUrl),
+              fit: BoxFit.cover,
+            ),
           ),
         ),
         footer: GridTileBar(
@@ -36,7 +40,8 @@ class ProductItem extends StatelessWidget {
                 ),
                 onPressed: () async {
                   try {
-                    await product.toggleFavoriteStatus(authData.token, authData.userId);
+                    await product.toggleFavoriteStatus(
+                        authData.token, authData.userId);
                   } catch (err) {
                     scaffold.showSnackBar(
                       SnackBar(
