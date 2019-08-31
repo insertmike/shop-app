@@ -67,4 +67,11 @@ class Auth with ChangeNotifier {
         "signInWithPassword?key=AIzaSyCA1uP1skoLoFcuutUImcgU23JsNcOxBMY";
     return _auth(email, password, urlApiKey);
   }
+
+  void logout() {
+    _token = null;
+    _userId = null;
+    _expiryDate = null;
+    notifyListeners();
+  }
 }
