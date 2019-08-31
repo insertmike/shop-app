@@ -49,7 +49,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
         'title': _editedProduct.title,
         'description': _editedProduct.description,
         'price': _editedProduct.price.toString(),
-        'imageUrl': '',
+        'imageUrl': _editedProduct.imageUrl,
       };
       _imageUrlController.text = _editedProduct.imageUrl;
     }
@@ -91,14 +91,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
       _isLoading = true;
     });
     if (_editedProduct.id != null) {
-      
       await Provider.of<Products>(context, listen: false)
           .updateProduct(_editedProduct.id, _editedProduct);
-          setState(() {
-          //_isLoading = false;
-          });
-          Navigator.of(context).pop();
-      
+      setState(() {
+        //_isLoading = false;
+      });
+      Navigator.of(context).pop();
     } else {
       try {
         await Provider.of<Products>(context, listen: false)
@@ -167,12 +165,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
                         // Create new product and overright the existing with it
                         // because the properties of the Product class are empty
                         _editedProduct = Product(
-                            title: value,
-                            description: _editedProduct.description,
-                            imageUrl: _editedProduct.imageUrl,
-                            price: _editedProduct.price,
-                            id: _editedProduct.id,
-                            isFavorite: _editedProduct.isFavorite);
+                          title: value,
+                          description: _editedProduct.description,
+                          imageUrl: _editedProduct.imageUrl,
+                          price: _editedProduct.price,
+                          id: _editedProduct.id,
+                        );
                       },
                       onFieldSubmitted: (val) =>
                           FocusScope.of(context).requestFocus(_priceFocusNode),
