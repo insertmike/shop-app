@@ -1,16 +1,12 @@
-# shop_app
+# weShop app :iphone:
+Project overview,functuonalities and dependencies from my August built *weShop* app, with main focus on State Management.
 
-A new Flutter project.
+Designed by Maximilian Schwarzmüller, implemented by me.
+ ## Project Overview
+*weShop* is online mobile cross-platform application, which allows users to shop variety of items on the market, as well as to add their own items and sell them to the public.
 
-## Getting Started
+- ### Overall Approach
+  - Used the [Provider Package & Pattern](https://pub.dev/packages/provider) to distribute the data upon the entire app. 
+  - Used the [Google's Firabase Web Server](https://firebase.google.com), which is internally communicating with the users db.
+  - Used Token Authentication - Stateless *RESTful API* to provide endpoints, to which the users are sending requests to get authenticated. 
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
